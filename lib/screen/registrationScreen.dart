@@ -2,6 +2,7 @@ import 'package:barcodescanner/controller/registration_controller.dart';
 import 'package:barcodescanner/model/registration_model.dart';
 import 'package:barcodescanner/screen/barcodeType.dart';
 import 'package:barcodescanner/screen/barcode_scanner.dart';
+import 'package:barcodescanner/screen/exterDir.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -20,6 +21,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   RegistrationController registrationController = RegistrationController();
   TextEditingController codeController = TextEditingController();
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  ExternalDir externalDir = ExternalDir();
 
   late String uniqId;
 
@@ -32,7 +34,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     String model = map["model"];
     String id=map["id"];
     String manufacturer=map["manufacturer"];
-    uniqId = id + model + manufacturer;
+    uniqId =  model + manufacturer;
     //print(uniqId);
   }
 
@@ -125,8 +127,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         // Navigator.of(context).pop();
                         if (_formKey.currentState!.validate()) {
                           print(uniqId);
+                           String tempFp1 = await externalDir.fileRead();
                           RegistrationModel? result =
                               await registrationController.postRegistration(
+                                  tempFp1,
                                   codeController.text, uniqId, "1");
                           if (result != null) {
                             SharedPreferences pref =

@@ -95,7 +95,7 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
             ),
             IconButton(
               onPressed: () {
-                _showDialog(context);
+                _showDialog(context, "all", 0);
               },
               icon: Icon(Icons.delete),
             ),
@@ -119,7 +119,7 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
                 //   filepaths.add(attachment);
                 // });
 
-                shareFilePgm.onShareCsv(context, scan1,widget.type);
+                shareFilePgm.onShareCsv(context, scan1, widget.type);
               },
               itemBuilder: (context) => [
                 PopupMenuItem(
@@ -174,18 +174,23 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
           builder: (context, value, child) {
             return SingleChildScrollView(
               scrollDirection: Axis.vertical,
-              child:
-               Container(
-                 alignment:widget.type=="Free Scan" ||widget.type=="API Scan" ? Alignment.center:null,
-                 child: DataTable(
-                  columnSpacing:widget.type=="Free Scan" ||widget.type=="API Scan" ?40: 30,
+              child: Container(
+                alignment:
+                    widget.type == "Free Scan" || widget.type == "API Scan"
+                        ? Alignment.center
+                        : null,
+                child: DataTable(
+                  columnSpacing:
+                      widget.type == "Free Scan" || widget.type == "API Scan"
+                          ? 40
+                          : 30,
                   columns: [
                     // DataColumn(label: Text("id")),
                     DataColumn(label: Text("barcode")),
                     DataColumn(label: Text("time")),
-                     if (widget.type == "Free Scan with quantity" ||
-                              widget.type == "API Scan with quantity")
-                    DataColumn(label: Text("qty")),
+                    if (widget.type == "Free Scan with quantity" ||
+                        widget.type == "API Scan with quantity")
+                      DataColumn(label: Text("qty")),
                     DataColumn(label: Text("")),
                     // DataColumn(label: Text("")),
 
@@ -206,11 +211,11 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
                               widget.type == "API Scan with quantity")
                             DataCell(
                                 TextFormField(
-                                  
                                   // controller: _controllertext,
                                   // initialValue: "${e["qty"]}",
                                   keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(border: InputBorder.none,hintText: "1"),
+                                  decoration: InputDecoration(
+                                      border: InputBorder.none, hintText: "1"),
                                   // onChanged: (value) {
                                   //   Provider.of<ProviderController>(context,
                                   //           listen: false)
@@ -228,14 +233,11 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
                                 ),
                                 showEditIcon: true),
 
-                          DataCell(
-                            Container(
+                          DataCell(Container(
                             // width: 5,
                             child: IconButton(
                                 onPressed: () {
-                                  Provider.of<ProviderController>(context,
-                                          listen: false)
-                                      .deleteFromTableScanlog(e["id"]);
+                                  _showDialog(context, "single", e["id"]);
                                 },
                                 icon: Icon(Icons.delete)),
                           )),
@@ -260,26 +262,35 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
                         ]),
                       )
                       .toList(),
+                ),
               ),
-               ),
             );
           },
         ));
   }
 
   //////////////////////////////////////////////////
-  void _showDialog(BuildContext context) {
+  void _showDialog(BuildContext context, String type, int id) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           content: new Text("Are u sure! u want to delete?"),
           actions: <Widget>[
+            ElevatedButton(onPressed: (){
+              Navigator.pop(context);
+            }, child: Text('cancel')),
             ElevatedButton(
               child: new Text("OK"),
               onPressed: () {
-                Provider.of<ProviderController>(context, listen: false)
-                    .deleteAllFromTableScanLog();
+                if (type == "all") {
+                  Provider.of<ProviderController>(context, listen: false)
+                      .deleteAllFromTableScanLog();
+                } else if (type == "single") {
+                  Provider.of<ProviderController>(context, listen: false)
+                      .deleteFromTableScanlog(id);
+                }
+
                 // BarcodeScanlogDB.instance.deleteAllRows();
                 // controller.add(true);
                 Navigator.of(context).pop();

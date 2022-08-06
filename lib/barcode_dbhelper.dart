@@ -1,6 +1,7 @@
 // ignore_for_file: unused_local_variable
 
 import 'package:barcodescanner/model/barcodescanner_model.dart';
+import 'package:barcodescanner/model/registration_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -38,9 +39,10 @@ class BarcodeScanlogDB {
   Future<Database> _initDB(String filepath) async {
     final dbpath = await getDatabasesPath();
     final path = join(dbpath, filepath);
-    return await openDatabase(path,
-        version: 1, onCreate: _createDB, 
-        // onUpgrade: _upgradeDB
+    return await openDatabase(
+      path,
+      version: 1, onCreate: _createDB,
+      // onUpgrade: _upgradeDB
     );
   }
 
@@ -124,18 +126,12 @@ class BarcodeScanlogDB {
 
   ///////////////////////////////////////////////
   Future insertRegistrationDetails(
-      String company_code,
-      String device_id,
-      String appType,
-      String company_id,
-      String company_name,
-      String user_id,
-      String expiry_date) async {
+      String company_code,String device_id, String appType, RegistrationModel rgModel) async {
     final db = await database;
     print("userId*****${user_id}");
     // print(user_id.runtimeType);
     var query =
-        'INSERT INTO tableRegistration(company_code, device_id, appType, company_id, company_name, user_id, expiry_date) VALUES("${company_code}", "${device_id}", "${appType}", "${company_id}", "${company_name}", "${user_id}", "${expiry_date}")';
+        'INSERT INTO tableRegistration(company_code, device_id, appType, company_id, company_name, user_id, expiry_date) VALUES("${company_code}", "${device_id}", "${appType}", "${rgModel.companyId}", "${rgModel.companyName}", "${rgModel.userId}", "${rgModel.expiryDate}")';
     var res = await db.rawInsert(query);
     print(query);
     print(res);
@@ -164,18 +160,18 @@ class BarcodeScanlogDB {
   //   await db.delete('tableScanLog');
   // }
 ///////////////////////////////////////////
- Future searchIn(String barcode)async{
+  Future searchIn(String barcode) async {
     Database db = await instance.database;
 
-    List<Map<String, dynamic>> list =
-        await db.rawQuery('SELECT * FROM tableScanLog WHERE barcode="${barcode}"');
-        if(list.isEmpty)
-        {
-          return false;
-        }else {
-          return true;
-        }
- }
+    List<Map<String, dynamic>> list = await db
+        .rawQuery('SELECT * FROM tableScanLog WHERE barcode="${barcode}"');
+    if (list.isEmpty) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   //////////////////////////////////////
   Future delete(int id) async {
     Database db = await instance.database;

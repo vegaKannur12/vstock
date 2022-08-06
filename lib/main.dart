@@ -1,4 +1,5 @@
 import 'package:barcodescanner/controller/provider_controller.dart';
+import 'package:barcodescanner/controller/registration_controller.dart';
 import 'package:barcodescanner/screen/barcode_scanner.dart';
 import 'package:barcodescanner/screen/createDir.dart';
 import 'package:barcodescanner/screen/device_info.dart';
@@ -12,16 +13,19 @@ import 'package:provider/provider.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
-    .then((_) {
-      runApp(
-        MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ProviderController()),
-      ],
-      child: MyApp(),
-    ),
-      );
-    });
+      .then((_) {
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => ProviderController()),
+          ChangeNotifierProvider(
+            create: (_) => RegistrationController(),
+          ),
+        ],
+        child: MyApp(),
+      ),
+    );
+  });
 }
 
 class MyApp extends StatefulWidget {

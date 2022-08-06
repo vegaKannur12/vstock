@@ -1,15 +1,23 @@
 import 'dart:convert';
 import 'package:barcodescanner/barcode_dbhelper.dart';
 import 'package:barcodescanner/model/registration_model.dart';
+import 'package:barcodescanner/screen/exterDir.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-class RegistrationController {
-  Future<RegistrationModel?> postRegistration(String company_code, String device_id,String app_id) async {
+class RegistrationController extends ChangeNotifier {
+  ExternalDir externalDir = ExternalDir();
+
+  Future<RegistrationModel?> postRegistration(
+      String fingerprints,
+      String company_code, String device_id, String app_id) async {
     try {
+      print("divuxe-----$device_id");
       Uri url = Uri.parse("http://trafiqerp.in/ydx/send_regkey");
       Map<String, dynamic> body = {
         'company_code': company_code,
+        // 'fcode': fingerprints,
+        // 'deviceinfo': device_id,
         'device_id': device_id,
         'app_id': app_id,
       };
@@ -20,10 +28,18 @@ class RegistrationController {
       var map = jsonDecode(response.body);
       print("from post data ${map}");
       print('user id------------${map["UserId"]}');
-      RegistrationModel regModel=RegistrationModel.fromJson(map);
-      int uid=int.parse(map["UserId"].toString());
-      var result=await BarcodeScanlogDB.instance.insertRegistrationDetails(company_code, device_id, "free to scan",map["CompanyId"], map["CompanyName"], map["UserId"], map["ExpiryDate"]);
-      return regModel;
+      RegistrationModel regModel = RegistrationModel.fromJson(map);
+      // int uid = int.parse(map["UserId"].toString());
+      // String fp=regModel.fp;
+      //       await externalDir.fileWrite(fp!);
+
+      var result = await BarcodeScanlogDB.instance.insertRegistrationDetails(
+          company_code,
+          device_id,
+          "free to scan",
+          regModel);
+      // return regModel;
+      notifyListeners();
     } catch (e) {
       print(e);
       return null;
