@@ -27,6 +27,9 @@ class BarcodeScanlogDB {
   static final rate = 'rate';
   static final size = 'size';
   static final product = 'product';
+  static final pcode = 'pcode';
+  static final ean = 'ean';
+
   // int DB_VERSION = 2;
   //////////////////////////////////////
 
@@ -70,7 +73,9 @@ class BarcodeScanlogDB {
             $description TEXT,
             $rate TEXT,
             $size TEXT,
-            $product TEXT 
+            $product TEXT,
+            $pcode TEXT,
+            $ean TEXT
           )
           ''');
 ////////////// registration table ////////////
@@ -90,7 +95,7 @@ class BarcodeScanlogDB {
 
   void _updateTableScanLog(Batch batch) {
     batch.execute(
-        'ALTER TABLE tableScanLog ADD model TEXT, brand TEXT, description TEXT, rate TEXT ,size TEXT, product TEXT');
+        'ALTER TABLE tableScanLog ADD model TEXT, brand TEXT, description TEXT, rate TEXT ,size TEXT, product TEXT,pcode TEXT,ean TEXT');
   }
 
   // Future insertBarcode(Data barcodeData) async {
@@ -111,11 +116,11 @@ class BarcodeScanlogDB {
     final db = await database;
     if (type == "Free Scan" || type == "Free Scan with quantity") {
       query =
-          'INSERT INTO tableScanLog(barcode, time, qty, page_id, model, brand, description, rate, size, product) VALUES("${barcode}", "${time}", ${qty}, ${page_id},"","","","","","")';
+          'INSERT INTO tableScanLog(barcode, time, qty, page_id, model, brand, description, rate, size, product, pcode, ean) VALUES("${barcode}", "${time}", ${qty}, ${page_id},"","","","","","","","")';
     }
     if (type == "API Scan" || type == "API Scan with quantity") {
       query =
-          'INSERT INTO tableScanLog(barcode, time, qty, page_id, model, brand, description, rate, size, product) VALUES("${barcodeData!.barcode}", "${time}", ${qty}, ${page_id},"${barcodeData.model}","${barcodeData.brand}","${barcodeData.description}","${barcodeData.rate}","${barcodeData.size}","${barcodeData.product}")';
+          'INSERT INTO tableScanLog(barcode, time, qty, page_id, model, brand, description, rate, size, product, pcode, ean) VALUES("${barcodeData!.barcode}", "${time}", ${qty}, ${page_id},"${barcodeData.model}","${barcodeData.brand}","${barcodeData.description}","${barcodeData.rate}","${barcodeData.size}","${barcodeData.product}","${barcodeData.pcode}","${barcodeData.ean}")';
     }
 
     var res = await db.rawInsert(query);
@@ -125,8 +130,8 @@ class BarcodeScanlogDB {
   }
 
   ///////////////////////////////////////////////
-  Future insertRegistrationDetails(
-      String company_code,String device_id, String appType, RegistrationModel rgModel) async {
+  Future insertRegistrationDetails(String company_code, String device_id,
+      String appType, RegistrationModel rgModel) async {
     final db = await database;
     print("userId*****${user_id}");
     // print(user_id.runtimeType);
@@ -189,7 +194,6 @@ class BarcodeScanlogDB {
   /////////////////select company nme////////////////
   Future<List<Map<String, dynamic>>> getCompanyDetails() async {
     Database db = await instance.database;
-
     List<Map<String, dynamic>> list =
         await db.rawQuery('SELECT * FROM tableRegistration');
     print("company details-- ${list}");

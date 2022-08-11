@@ -29,6 +29,8 @@ class Data {
   String? description;
   String? rate;
   String? product;
+  String? ean;
+  String? pcode;
 
   Data(
       {this.barcode,
@@ -37,7 +39,7 @@ class Data {
       this.size,
       this.description,
       this.rate,
-      this.product});
+      this.product,this.ean,this.pcode});
 
   Data.fromJson(Map<String, dynamic> json) {
     barcode = json['Barcode'];
@@ -47,6 +49,9 @@ class Data {
     description = json['Description'];
     rate = json['Rate'];
     product = json['Product'];
+    ean = json['ean'];
+    pcode = json['pcode'];
+
   }
 
   Map<String, dynamic> toJson() {
@@ -58,6 +63,8 @@ class Data {
     data['Description'] = this.description;
     data['Rate'] = this.rate;
     data['Product'] = this.product;
+    data['Ean'] = this.ean;
+    data['Pcode'] = this.pcode;
     return data;
   }
 }

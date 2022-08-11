@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:barcodescanner/components/color_theme.dart';
 import 'package:barcodescanner/components/shareFile.dart';
 import 'package:barcodescanner/controller/provider_controller.dart';
+import 'package:barcodescanner/controller/registration_controller.dart';
 import 'package:barcodescanner/screen/tableList.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -64,17 +66,27 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
         appBar: AppBar(
-          title: FutureBuilder<List<Map<String, dynamic>>>(
-              future: BarcodeScanlogDB.instance.getCompanyDetails(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Container();
-                }
-                //  return Text(snapshot.data);
-                return Text(snapshot.data![0]["company_name"]);
-              }),
+          title:
+              // Consumer<RegistrationController>(
+              //   builder: (context, value, child) {
+              //     print("comnnn-${value.comName.toString()}");
+              //     if (value.isLoading) {
+              //       return CircularProgressIndicator();
+              //     } else {
+              //       return Text(value.comName.toString());
+              //     }
+              //   },
+              // ),
 
-          // title: Text(widget.companyName != null ? widget.companyName.toString():"scanner"),
+              FutureBuilder<List<Map<String, dynamic>>>(
+                  future: BarcodeScanlogDB.instance.getCompanyDetails(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Container();
+                    }
+                    //  return Text(snapshot.data);
+                    return Text(snapshot.data![0]["company_name"]);
+                  }),
           actions: [
             // IconButton(
             //     onPressed: () {
@@ -174,96 +186,119 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
           builder: (context, value, child) {
             return SingleChildScrollView(
               scrollDirection: Axis.vertical,
-              child: Container(
-                alignment:
-                    widget.type == "Free Scan" || widget.type == "API Scan"
-                        ? Alignment.center
-                        : null,
-                child: DataTable(
-                  columnSpacing:
-                      widget.type == "Free Scan" || widget.type == "API Scan"
-                          ? 40
-                          : 30,
-                  columns: [
-                    // DataColumn(label: Text("id")),
-                    DataColumn(label: Text("barcode")),
-                    DataColumn(label: Text("time")),
-                    if (widget.type == "Free Scan with quantity" ||
-                        widget.type == "API Scan with quantity")
-                      DataColumn(label: Text("qty")),
-                    DataColumn(label: Text("")),
-                    // DataColumn(label: Text("")),
-
-                    // DataColumn(label: Text("id")),
-                  ],
-                  rows: value.listResult
-                      .map(
-                        (e) => DataRow(cells: [
-                          // DataCell(Text(e["id"].toString())),
-                          DataCell(Text(e["barcode"].toString())),
-                          DataCell(Text(e["time"].toString())),
-                          // DataCell(TextField()),
-                          // if (widget.type == "Free Scan" ||
-                          //     widget.type == "API Scan")
-                          //   DataCell(Text(e["qty"].toString())),
-
+              child: value.listResult.length == 0
+                  ? Container(
+                      height: size.height * 0.8,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        // crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            child: Center(
+                              child: Image.asset(
+                                "asset/No.png",
+                                color: ColorThemeComponent.color1,
+                                height: size.height * 0.2,
+                                width: size.width * 0.2,
+                              ),
+                            ),
+                          ),
+                          Text('No data!!!',style: TextStyle(fontSize: 18),)
+                        ],
+                      ),
+                    )
+                  : Container(
+                      alignment: widget.type == "Free Scan" ||
+                              widget.type == "API Scan"
+                          ? Alignment.center
+                          : null,
+                      child: DataTable(
+                        columnSpacing: widget.type == "Free Scan" ||
+                                widget.type == "API Scan"
+                            ? 40
+                            : 30,
+                        columns: [
+                          // DataColumn(label: Text("id")),
+                          DataColumn(label: Text("barcode")),
+                          DataColumn(label: Text("time")),
                           if (widget.type == "Free Scan with quantity" ||
                               widget.type == "API Scan with quantity")
-                            DataCell(
-                                TextFormField(
-                                  // controller: _controllertext,
-                                  // initialValue: "${e["qty"]}",
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                      border: InputBorder.none, hintText: "1"),
-                                  // onChanged: (value) {
-                                  //   Provider.of<ProviderController>(context,
-                                  //           listen: false)
-                                  //       .setUpdatedQty(value);
-                                  // },
-                                  onFieldSubmitted: (val) {
-                                    Provider.of<ProviderController>(context,
-                                            listen: false)
-                                        .updateTableScanLog(val, e["id"]);
-                                    // Provider.of<ProviderController>(context,
-                                    //         listen: false)
-                                    //     .setUpdatedQty(val);
-                                    // print('onSubmited $val');
-                                  },
-                                ),
-                                showEditIcon: true),
+                            DataColumn(label: Text("qty")),
+                          DataColumn(label: Text("")),
+                          // DataColumn(label: Text("")),
 
-                          DataCell(Container(
-                            // width: 5,
-                            child: IconButton(
-                                onPressed: () {
-                                  _showDialog(context, "single", e["id"]);
-                                },
-                                icon: Icon(Icons.delete)),
-                          )),
-                          // DataCell(Container(
-                          //   // width: 5,
-                          //   child: IconButton(
-                          //       onPressed: () {
-                          //         print("edit clicked");
-                          //         updatedQty=Provider.of<ProviderController>(context,
-                          //                 listen: false).updatedQty;
-                          //         print('updatedQty $updatedQty');
+                          // DataColumn(label: Text("id")),
+                        ],
+                        rows: value.listResult
+                            .map(
+                              (e) => DataRow(cells: [
+                                // DataCell(Text(e["id"].toString())),
+                                DataCell(Text(e["barcode"].toString())),
+                                DataCell(Text(e["time"].toString())),
+                                // DataCell(TextField()),
+                                // if (widget.type == "Free Scan" ||
+                                //     widget.type == "API Scan")
+                                //   DataCell(Text(e["qty"].toString())),
 
-                          //         Provider.of<ProviderController>(context,
-                          //                 listen: false)
-                          //             .updateTableScanLog(updatedQty,e["id"]);
-                          //       },
-                          //       icon: Icon(Icons.done),
-                          //       color: Colors.green,
-                          //       ),
-                          // )),
-                          // DataCell(TextField())
-                        ]),
-                      )
-                      .toList(),
-                ),
-              ),
+                                if (widget.type == "Free Scan with quantity" ||
+                                    widget.type == "API Scan with quantity")
+                                  DataCell(
+                                      TextFormField(
+                                        // controller: _controllertext,
+                                        // initialValue: "${e["qty"]}",
+                                        keyboardType: TextInputType.number,
+                                        decoration: InputDecoration(
+                                            border: InputBorder.none,
+                                            hintText: "1"),
+                                        // onChanged: (value) {
+                                        //   Provider.of<ProviderController>(context,
+                                        //           listen: false)
+                                        //       .setUpdatedQty(value);
+                                        // },
+                                        onFieldSubmitted: (val) {
+                                          Provider.of<ProviderController>(
+                                                  context,
+                                                  listen: false)
+                                              .updateTableScanLog(val, e["id"]);
+                                          // Provider.of<ProviderController>(context,
+                                          //         listen: false)
+                                          //     .setUpdatedQty(val);
+                                          // print('onSubmited $val');
+                                        },
+                                      ),
+                                      showEditIcon: true),
+
+                                DataCell(Container(
+                                  // width: 5,
+                                  child: IconButton(
+                                      onPressed: () {
+                                        _showDialog(context, "single", e["id"]);
+                                      },
+                                      icon: Icon(Icons.delete)),
+                                )),
+                                // DataCell(Container(
+                                //   // width: 5,
+                                //   child: IconButton(
+                                //       onPressed: () {
+                                //         print("edit clicked");
+                                //         updatedQty=Provider.of<ProviderController>(context,
+                                //                 listen: false).updatedQty;
+                                //         print('updatedQty $updatedQty');
+
+                                //         Provider.of<ProviderController>(context,
+                                //                 listen: false)
+                                //             .updateTableScanLog(updatedQty,e["id"]);
+                                //       },
+                                //       icon: Icon(Icons.done),
+                                //       color: Colors.green,
+                                //       ),
+                                // )),
+                                // DataCell(TextField())
+                              ]),
+                            )
+                            .toList(),
+                      ),
+                    ),
             );
           },
         ));
@@ -277,9 +312,11 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
         return AlertDialog(
           content: new Text("Are u sure! u want to delete?"),
           actions: <Widget>[
-            ElevatedButton(onPressed: (){
-              Navigator.pop(context);
-            }, child: Text('cancel')),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('cancel')),
             ElevatedButton(
               child: new Text("OK"),
               onPressed: () {

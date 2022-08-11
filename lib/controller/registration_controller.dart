@@ -7,12 +7,15 @@ import 'package:http/http.dart' as http;
 
 class RegistrationController extends ChangeNotifier {
   ExternalDir externalDir = ExternalDir();
-
+  String? comName;
+  bool isLoading=false;
   Future<RegistrationModel?> postRegistration(
       String fingerprints,
       String company_code, String device_id, String app_id) async {
     try {
       print("divuxe-----$device_id");
+      isLoading=true;
+      notifyListeners();
       Uri url = Uri.parse("http://trafiqerp.in/ydx/send_regkey");
       Map<String, dynamic> body = {
         'company_code': company_code,
@@ -25,10 +28,16 @@ class RegistrationController extends ChangeNotifier {
         url,
         body: body,
       );
+       isLoading=false;
+      notifyListeners();
       var map = jsonDecode(response.body);
       print("from post data ${map}");
       print('user id------------${map["UserId"]}');
       RegistrationModel regModel = RegistrationModel.fromJson(map);
+      comName=regModel.companyName;
+      print("com---$comName");
+      notifyListeners();
+
       // int uid = int.parse(map["UserId"].toString());
       // String fp=regModel.fp;
       //       await externalDir.fileWrite(fp!);
